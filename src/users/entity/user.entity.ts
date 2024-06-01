@@ -1,4 +1,5 @@
 import { AggregateRoot } from '@nestjs/cqrs';
+import { UserCreatedEvent } from '../events/impl/user-created.event';
 
 
 export class User extends AggregateRoot {
@@ -17,5 +18,9 @@ export class User extends AggregateRoot {
 
     sayHello() {
         console.log(`Hello, ${this.name}!`);
+    }
+
+    isCreated() {
+        this.apply(new UserCreatedEvent(this))
     }
 }

@@ -1,4 +1,4 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, EventPublisher, ICommandHandler } from '@nestjs/cqrs';
 import { CreateCommand } from '../impl/create.command';
 import { User } from '../../entity/user.entity';
 import { UserRepository } from 'src/users/repository/user.repository';
@@ -9,12 +9,14 @@ export class CreateHandler implements ICommandHandler<CreateCommand> {
 
     constructor(
         private readonly userRepository: UserRepository,
+        private readonly publisher: EventPublisher,
     ) { }
 
     async execute(command: CreateCommand) {
         const user = new User(command.name, command.email);
         await this.userRepository.save(user);
-        console.log("User created with name: ", command.name, " and email: ", command.email);
+        user.isCreated();
+        this.publisher.mergeObjectContext(user).commit();
         return command;
     }
 }
